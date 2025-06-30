@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS waste_types (
 );
 
 CREATE TABLE IF NOT EXISTS waste_collection (
-    read_id     SERIAL PRIMARY KEY,
+    waste_collection_id     SERIAL PRIMARY KEY,
     period_id   INTEGER NOT NULL,
     amount      INTEGER NOT NULL,
     waste_id    INTEGER NOT NULL,
@@ -52,16 +52,16 @@ CREATE TABLE IF NOT EXISTS waste_collection (
     FOREIGN KEY (period_id) REFERENCES readings(period_id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS weigth_data (
-    read_id     SERIAL PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS weight_data (
+    weight_data_id     SERIAL PRIMARY KEY,
     period_id   INTEGER NOT NULL,
     hour_period DATETIME,
-    weigth      DECIMAL(10,4),
+    weight      DECIMAL(10,4),
     FOREIGN KEY (period_id) REFERENCES readings(period_id) ON DELETE CASCADE 
 );
 
 CREATE TABLE IF NOT EXISTS gps_data (
-    read_id     SERIAL PRIMARY KEY,
+    gps_data_id     SERIAL PRIMARY KEY,
     period_id   INTEGER NOT NULL,
     latitude    DECIMAL(10,10),
     longitude   DECIMAL(10,10),
