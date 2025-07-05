@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE TABLE IF NOT EXISTS prototypes (
-    prototype_id   SERIAL PRIMARY KEY,
+    prototype_id   VARCHAR(45) PRIMARY KEY, 
     prototype_name VARCHAR(45) NOT NULL,
     model          VARCHAR(45) NOT NULL,
     user_id        INTEGER NOT NULL,
