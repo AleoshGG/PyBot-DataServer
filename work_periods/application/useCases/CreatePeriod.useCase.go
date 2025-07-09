@@ -13,6 +13,6 @@ func NewCreatePeriod(wp repositories.IWorkPeriod) *CreatePeriod{
 	return &CreatePeriod{wp: wp}
 }
 
-func (cp *CreatePeriod) Run(wp models.WorkPeriod) (error, int) {
+func (cp *CreatePeriod) Run(wp models.WorkPeriod) (int, error) {
 	return cp.wp.CreatePeriod(wp)
 }

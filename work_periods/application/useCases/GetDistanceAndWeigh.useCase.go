@@ -13,6 +13,6 @@ func NewGetDistanceAndWeight(wp repositories.IWorkPeriod) *GetDistanceAndWeight 
 	return &GetDistanceAndWeight{wp: wp}
 }
 
-func (gdw *GetDistanceAndWeight) Run() (error, models.Reading) {
+func (gdw *GetDistanceAndWeight) Run() (models.Reading, error) {
 	return gdw.wp.GetDistanceAndWeight()
 }
