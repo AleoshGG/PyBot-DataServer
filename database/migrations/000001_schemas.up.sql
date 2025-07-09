@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS users (
+/* CREATE TABLE IF NOT EXISTS users (
     user_id    SERIAL PRIMARY KEY,
     first_name VARCHAR(45) NOT NULL,
     last_name  VARCHAR(45) NOT NULL,
@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE TABLE IF NOT EXISTS prototypes (
-    prototype_id   VARCHAR(45) PRIMARY KEY, 
+    prototype_id   VARCHAR(100) PRIMARY KEY, 
     prototype_name VARCHAR(45) NOT NULL,
     model          VARCHAR(45) NOT NULL,
     user_id        INTEGER NOT NULL,
@@ -20,15 +20,15 @@ CREATE TABLE IF NOT EXISTS sensors (
     model       VARCHAR(45) NOT NULL,
     prototype_id INTEGER NOT NULL,
     FOREIGN KEY (prototype_id) REFERENCES prototypes(prototype_id) ON DELETE CASCADE
-);
+); */
 
 CREATE TABLE IF NOT EXISTS work_periods (
     period_id    SERIAL PRIMARY KEY,
     start_hour   DATETIME NOT NULL,
     end_hour     DATETIME NOT NULL,
     day_work     VARCHAR(15) NOT NULL,
-    prototype_id INTEGER NOT NULL,
-    FOREIGN KEY (prototype_id) REFERENCES prototypes(prototype_id) ON DELETE CASCADE
+    prototype_id VARCHAR(100) NOT NULL
+    /*FOREIGN KEY (prototype_id) REFERENCES prototypes(prototype_id) ON DELETE CASCADE*/
 );
 
 CREATE TABLE IF NOT EXISTS readings (
