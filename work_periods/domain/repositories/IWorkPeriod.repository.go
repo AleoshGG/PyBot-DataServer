@@ -7,8 +7,4 @@ type IWorkPeriod interface {
 	UpdatePeriod(end_hour string) (error)
 	GetDistanceAndWeight() (error, models.Reading) 
 	ReadingsRegister(r models.Reading) (error)
-	WasteCollectionRegister(wc models.WasteCollection) (error, id int)
-	WeightRegister(w models.WeightData) (error, id int)
-	GPSRegister(gps models.GPSData) (error, id int)
-	GetWasteTypes() (error, []models.WasteType)
 }
