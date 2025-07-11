@@ -87,6 +87,15 @@ func Migration() {
 	fmt.Println("Migraciones aplicadas correctamente")
 }
 
+func DownLastVersion(m *migrate.Migrate) {
+	// Aplicar migraciones
+	if err := m.Down(); err != nil && err != migrate.ErrNoChange {
+		log.Fatal("Error al aplicar migraciones (Deshacer cambios):", err)
+	}
+
+	fmt.Println("Migraciones aplicadas correctamente")
+}
+
 func (conn *ConnPostgreSQL) QueryRowScan(query string, dest ...interface{}) error {
 	return conn.DB.QueryRow(query).Scan(dest...)
 }

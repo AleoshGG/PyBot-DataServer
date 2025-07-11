@@ -10,6 +10,6 @@ func NewUpdatePeriod(wp repositories.IWorkPeriod) *UpdatePeriod {
 	return &UpdatePeriod{wp: wp}
 }
 
-func (up *UpdatePeriod) Run(end_hour string) (error) {
-	return up.wp.UpdatePeriod(end_hour)
+func (up *UpdatePeriod) Run(end_hour string, period_id int64) (error) {
+	return up.wp.UpdatePeriod(end_hour, period_id)
 }

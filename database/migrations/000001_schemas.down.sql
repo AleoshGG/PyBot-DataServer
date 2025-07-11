@@ -1,0 +1,6 @@
+DROP TABLE IF EXISTS work_periods;
+DROP TABLE IF EXISTS readings;
+DROP TABLE IF EXISTS waste_types;
+DROP TABLE IF EXISTS waste_collection;
+DROP TABLE IF EXISTS weight_data;
+DROP TABLE IF EXISTS gps_data;
