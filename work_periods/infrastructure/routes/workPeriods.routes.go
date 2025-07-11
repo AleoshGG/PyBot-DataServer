@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RegisteRouter(r *gin.Engine) {
+func RegisterRouter(r *gin.Engine) {
 	workPeriodsRoutes := r.Group("/workPeriods")
 	{
 		workPeriodsRoutes.POST("/", controllers.NewCreatePeriodController().CreatePeriod)
