@@ -14,5 +14,6 @@ func RegisterRouter(r *gin.Engine) {
 		workPeriodsRoutes.GET("/readingsGlobal", controllers.NewGetDistanceAndWeightController().GetDistanceAndWeight)
 		workPeriodsRoutes.POST("/readings", controllers.NewReadingsRegisterController().ReadingsRegister)
 		workPeriodsRoutes.PATCH("/", controllers.NewUpdatePeriodController().UpdatePeriod)
+		workPeriodsRoutes.PUT("/", controllers.NewUpdateReadingController().UpdateReading)
 	}
 }

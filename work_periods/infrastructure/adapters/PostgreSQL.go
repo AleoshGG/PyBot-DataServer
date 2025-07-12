@@ -138,8 +138,8 @@ func (postgre *PostgreSQL) GetDistanceAndWeight(period_id int64) (models.Reading
 }
 
 func (postgre *PostgreSQL) ReadingsRegister(r models.Reading) (error) {
-	query := `INSERT INTO readings (period_id, distance_traveled, weight_waste)
-			  VALUES ($1, $2, $3)
+	query := `INSERT INTO readings (distance_traveled, weight_waste)
+			  VALUES ($2, $3)
 			  RETURNING period_id`
 
 	var id int
@@ -153,5 +153,17 @@ func (postgre *PostgreSQL) ReadingsRegister(r models.Reading) (error) {
 	return nil
 }
 	
-	 
+func (postgre *PostgreSQL) UpdateReadings(r models.Reading) (error) {
+	 query := `UPDATE readings
+       		   SET distance_traveled = $1, weight_waste = $2
+     		   WHERE period_id = $3`
+	
+	_, err := postgre.conn.ExecutePreparedQuery(query, r.Distance_traveled, r.Weight_waste, r.Period_id)
+	if err != nil {
+		fmt.Printf("Error al ejecutar UpdatePeriod: %v", err)
+		return err
+	}
+	
+	return nil
+}
 	
