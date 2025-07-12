@@ -5,6 +5,7 @@ import (
 	"PyBot-DataServer/work_periods/domain/models"
 	"PyBot-DataServer/work_periods/infrastructure"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,9 +21,20 @@ func NewGetDistanceAndWeightController() *GetDistanceAndWeightController {
 }
 
 func (gdwc *GetDistanceAndWeightController) GetDistanceAndWeight(c *gin.Context) {
+	id := c.Query("id")
+	
 	var reading models.Reading
 	
-	reading, err := gdwc.gdw.Run()
+	period_id, err := strconv.ParseInt(id, 10, 64)
+	if err != nil{
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status": false,
+			"error": "Error: No se pudo obtener el ID numérico",
+		})
+		return
+	}
+
+	reading, err = gdwc.gdw.Run(period_id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  false,

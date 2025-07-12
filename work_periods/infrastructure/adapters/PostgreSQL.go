@@ -20,6 +20,34 @@ func NewPostgreSQL() *PostgreSQL {
 	return &PostgreSQL{conn: conn}
 }
 
+func (postgre *PostgreSQL) GetLastPeriod() (models.LastPeriod, error) {
+	query := `SELECT *
+			  FROM getLastHourPeriod()`
+	
+	var lastPeriod models.LastPeriod
+	
+	rows, err := postgre.conn.FetchRows(query)
+	if err != nil {
+		fmt.Printf("error al ejecutar la consulta: %v", err)
+		return models.LastPeriod{}, err
+	}
+
+	defer rows.Close()
+
+	if !rows.Next() {
+        fmt.Println("No se pudieron obtener los datos.")
+        return models.LastPeriod{}, nil
+    }
+
+	if err := rows.Scan(&lastPeriod.Period_id, &lastPeriod.LastHour); err != nil {
+		fmt.Printf("error al escanear el ultimo periodo: %v", err)
+        return models.LastPeriod{}, err
+    }
+
+	
+	return lastPeriod, nil
+}
+
 func (postgre *PostgreSQL) CreatePeriod(wp models.WorkPeriod) (int, error) {
 	query := `INSERT INTO work_periods (start_hour, end_hour, day_work, prototype_id)
 	          VALUES ($1, $2, $3, $4)
@@ -50,10 +78,55 @@ func (postgre *PostgreSQL) UpdatePeriod(end_hour string, period_id int64) (error
 	return nil
 }
 	
-func (postgre *PostgreSQL) GetDistanceAndWeight() (models.Reading, error) {
+func (postgre *PostgreSQL) GetDistanceAndWeight(period_id int64) (models.Reading, error) {
 	// Llamadas a las funciones especiales de PostgreSQL
+	query := `SELECT *
+			  FROM getLastWeight()`
+	
+	var readings models.Reading
+	
+	rows, err := postgre.conn.FetchRows(query)
+	if err != nil {
+		fmt.Printf("error al ejecutar la consulta: %v", err)
+		return models.Reading{}, err
+	}
 
-	return models.Reading{}, nil
+	defer rows.Close()
+
+	if !rows.Next() {
+        fmt.Println("No se pudieron obtener los datos.")
+        return models.Reading{}, nil
+    }
+
+	if err := rows.Scan(&readings.Weight_waste); err != nil {
+		fmt.Printf("error al escanear el weight: %v", err)
+        return models.Reading{}, err
+    }
+
+	query = `SELECT *
+			  FROM calcular_distancia_total($1)`
+
+	rows, err = postgre.conn.FetchRows(query, period_id)
+	if err != nil {
+		fmt.Printf("error al ejecutar la consulta: %v", err)
+		return models.Reading{}, err
+	}
+
+	defer rows.Close()
+
+	if !rows.Next() {
+        fmt.Println("No se pudieron obtener los datos.")
+        return models.Reading{}, nil
+    }
+
+	if err := rows.Scan(&readings.Distance_traveled); err != nil {
+		fmt.Printf("error al escanear el distance: %v", err)
+        return models.Reading{}, err
+    }
+
+	readings.Period_id = int(period_id)
+	
+	return readings, nil
 }
 
 func (postgre *PostgreSQL) ReadingsRegister(r models.Reading) (error) {
