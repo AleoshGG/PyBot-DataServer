@@ -4,6 +4,7 @@ import (
 	"PyBot-DataServer/database/conn"
 	"PyBot-DataServer/sensors/domain/models"
 	"fmt"
+	"time"
 )
 
 type PostgreSQL struct {
@@ -56,8 +57,15 @@ func (postgres *PostgreSQL)	WeightRegister(w models.WeightData) (int, error) {
 			  RETURNING weight_data_id` 
 
 	var id int
+	
+	const layout = "2006-01-02T15:04:05.999999Z07:00"
+	startT, err := time.Parse(layout, w.Hour_period)
+	if err != nil {
+		fmt.Printf("Error al ejecutar parsear la hora de periodo: %v", err)
+		return 0, err
+	}
 
-	err := postgres.conn.DB.QueryRow(query, w.Period_id, w.Hour_period, w.Weight).Scan(&id)
+	err = postgres.conn.DB.QueryRow(query, w.Period_id, startT, w.Weight).Scan(&id)
 	if err != nil {
 		fmt.Printf("Error al ejecutarr la consulta WeightRegister: %v", err)
 		return 0, err
@@ -72,6 +80,7 @@ func (postgres *PostgreSQL)	GPSRegister(gps models.GPSData) (int, error) {
 			  RETURNING gps_data_id`
 
 	var id int
+
 	err := postgres.conn.DB.QueryRow(
 		query, 
 		gps.Period_id,

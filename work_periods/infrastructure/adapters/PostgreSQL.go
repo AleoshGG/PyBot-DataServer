@@ -4,6 +4,7 @@ import (
 	"PyBot-DataServer/database/conn"
 	"PyBot-DataServer/work_periods/domain/models"
 	"fmt"
+	"time"
 )
 
 type PostgreSQL struct {
@@ -52,10 +53,17 @@ func (postgre *PostgreSQL) CreatePeriod(wp models.WorkPeriod) (int, error) {
 	query := `INSERT INTO work_periods (start_hour, end_hour, day_work, prototype_id)
 	          VALUES ($1, $2, $3, $4)
 			  RETURNING period_id`
+			  
+	const layout = "2006-01-02T15:04:05.999999Z07:00"
+	startT, err := time.Parse(layout, wp.Start_hour)
+	if err != nil {
+		fmt.Printf("Error al ejecutar parsear la hora de inicio: %v", err)
+		return 0, err
+	}
 	
 	var id int
 	
-	err := postgre.conn.DB.QueryRow(query, wp.Start_hour, wp.End_hour, wp.Day_work, wp.Prototype_id).Scan(&id)	
+	err = postgre.conn.DB.QueryRow(query, startT, startT, wp.Day_work, wp.Prototype_id).Scan(&id)	
 	if err != nil {
 		fmt.Printf("Error al ejecutar CreatePeriod: %v", err)
 		return 0, err
