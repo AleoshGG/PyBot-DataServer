@@ -81,7 +81,14 @@ func (postgres *PostgreSQL)	GPSRegister(gps models.GPSData) (int, error) {
 
 	var id int
 
-	err := postgres.conn.DB.QueryRow(
+	const layout = "2006-01-02T15:04:05.999999Z07:00"
+	startT, err := time.Parse(layout, gps.Hour_UTC)
+	if err != nil {
+		fmt.Printf("Error al ejecutar parsear la hora UTC: %v", err)
+		return 0, err
+	}
+
+	err = postgres.conn.DB.QueryRow(
 		query, 
 		gps.Period_id,
 		gps.Latitude,
@@ -89,7 +96,7 @@ func (postgres *PostgreSQL)	GPSRegister(gps models.GPSData) (int, error) {
 		gps.Altitude,
 		gps.Speed,
 		gps.Date_gps,
-		gps.Hour_UTC,
+		startT,
 	).Scan(&id)	
 
 	if err != nil {

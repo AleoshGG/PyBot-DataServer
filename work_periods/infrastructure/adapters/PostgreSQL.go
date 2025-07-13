@@ -138,7 +138,7 @@ func (postgre *PostgreSQL) GetDistanceAndWeight(period_id int64) (models.Reading
 }
 
 func (postgre *PostgreSQL) ReadingsRegister(r models.Reading) (error) {
-	query := `INSERT INTO readings (period_id,distance_traveled, weight_waste)
+	query := `INSERT INTO readings (period_id, distance_traveled, weight_waste)
 			  VALUES ($1, $2, $3)
 			  RETURNING period_id`
 
