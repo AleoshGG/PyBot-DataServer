@@ -10,6 +10,6 @@ func NewUpdateWasteCollection(db repositories.ISensor) *UpdateWasteCollection {
 	return &UpdateWasteCollection{sr: db}
 }
 
-func (upc *UpdateWasteCollection) Run(amount, id int64) (error) {
-	return upc.sr.UpdateWasteCollection(amount, id)
+func (upc *UpdateWasteCollection) Run(id int64) (error) {
+	return upc.sr.UpdateWasteCollection(id)
 }

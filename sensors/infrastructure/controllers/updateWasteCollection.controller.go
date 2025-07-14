@@ -21,22 +21,12 @@ func NewUpdateWasteCollectionController() *UpdateWasteCollectionContoller {
 }
 
 func (uwcc *UpdateWasteCollectionContoller) UpdateWasteCollection(c *gin.Context) {
-	amountS := c.Query("Amount")
 	Id := c.Query("Id")
 
-	if amountS == "" || Id == "" {
+	if Id == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  false,
 			"message": "Error: Faltan los parámetros 'Amount' e 'Id'",
-		})
-		return
-	}
-
-	amount, err := strconv.ParseInt(amountS, 10, 64)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"status":  false,
-			"message": "Error al obtener 'Amount': " + err.Error(),
 		})
 		return
 	}
@@ -50,7 +40,7 @@ func (uwcc *UpdateWasteCollectionContoller) UpdateWasteCollection(c *gin.Context
 		return
 	}
 
-	if err := uwcc.uwc.Run(amount, id); err != nil {
+	if err := uwcc.uwc.Run(id); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status": false,
 			"error": "Error al actualizar el recurso: " + err.Error(),

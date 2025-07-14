@@ -37,12 +37,12 @@ func (postgres *PostgreSQL)	WasteCollectionRegister(wc models.WasteCollection) (
 	return id, nil
 }
 
-func (postgres *PostgreSQL) UpdateWasteCollection(amount int64, id int64) (error) {
-	query := `UPDATE waste_collection
-			  SET amount = $1
-			  WHERE waste_collection = $2`
+func (postgres *PostgreSQL) UpdateWasteCollection(id int64) (error) {
+	query := `INSERT INTO waste_collection (amount) 
+	          VALUES (DEFAULT)
+			  WHERE waste_collection = $1`
 
-	_, err := postgres.conn.ExecutePreparedQuery(query, amount, id)
+	_, err := postgres.conn.ExecutePreparedQuery(query, id)
 	if err != nil {
 		fmt.Printf("Error al ejecutar UpdateWasteCollection: %v", err)
 		return err
