@@ -40,7 +40,7 @@ func (postgres *PostgreSQL)	WasteCollectionRegister(wc models.WasteCollection) (
 func (postgres *PostgreSQL) UpdateWasteCollection(id int64) (error) {
 	query := `UPDATE INTO waste_collection 
 			  SET aumount = amount + 1
-			  WHERE waste_collection = $1`
+			  WHERE waste_collection_id = $1`
 
 	_, err := postgres.conn.ExecutePreparedQuery(query, id)
 	if err != nil {
