@@ -23,12 +23,12 @@ func NewPostgreSQL() *PostgreSQL {
 
 func (postgres *PostgreSQL)	WasteCollectionRegister(wc models.WasteCollection) (int, error) {
 	query := `INSERT INTO waste_collection (period_id, amount, waste_id)
-			  VALUES ($1, $2, $3)
+			  VALUES ($1, DEFAULT, $2)
 			  RETURNING waste_collection_id`
 
 	var id int		  
 	
-	err := postgres.conn.DB.QueryRow(query, wc.Period_id, wc.Amount, wc.Waste_id).Scan(&id)
+	err := postgres.conn.DB.QueryRow(query, wc.Period_id, wc.Waste_id).Scan(&id)
 	if err != nil {
 		fmt.Printf("Error al ejecutar WasteCollectionRegister: %v", err)
 		return 0, err
@@ -38,8 +38,8 @@ func (postgres *PostgreSQL)	WasteCollectionRegister(wc models.WasteCollection) (
 }
 
 func (postgres *PostgreSQL) UpdateWasteCollection(id int64) (error) {
-	query := `INSERT INTO waste_collection (amount) 
-	          VALUES (DEFAULT)
+	query := `UPDATE INTO waste_collection 
+			  SET aumount = amount + 1
 			  WHERE waste_collection = $1`
 
 	_, err := postgres.conn.ExecutePreparedQuery(query, id)

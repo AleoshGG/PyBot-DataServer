@@ -1,8 +1,5 @@
-ALTER TABLE gps_data
-  ALTER COLUMN latitude  TYPE DECIMAL(11,8),
-  ALTER COLUMN longitude TYPE DECIMAL(11,8),
-  ALTER COLUMN altitude  TYPE DECIMAL(10,4),
-  ALTER COLUMN speed     TYPE DECIMAL(8,4);
-
 ALTER TABLE waste_collection
- ALTER COLUMN amount TYPE SERIAL NOT NULL; 
+ ALTER COLUMN amount TYPE INTEGER DEFAULT 1;
+
+INSERT INTO waste_types (waste_id, waste_types) VALUES (DEFAULT, "PET");
+INSERT INTO waste_types (waste_id, waste_types) VALUES (DEFAULT, "CAN");
