@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS readings (
 CREATE TABLE IF NOT EXISTS waste_types (
     waste_id   SERIAL PRIMARY KEY,
     waste_type VARCHAR(50) NOT NULL
-);
+); 
 
 CREATE TABLE IF NOT EXISTS waste_collection (
     waste_collection_id     SERIAL PRIMARY KEY,
