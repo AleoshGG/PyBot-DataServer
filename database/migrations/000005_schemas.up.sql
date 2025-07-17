@@ -1,0 +1,2 @@
+ALTER TABLE work_periods 
+    ADD COLUMN backup BOOLEAN DEFAULT FALSE;

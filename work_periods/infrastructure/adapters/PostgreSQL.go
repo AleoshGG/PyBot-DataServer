@@ -50,8 +50,8 @@ func (postgre *PostgreSQL) GetLastPeriod() (models.LastPeriod, error) {
 }
 
 func (postgre *PostgreSQL) CreatePeriod(wp models.WorkPeriod) (int, error) {
-	query := `INSERT INTO work_periods (start_hour, end_hour, day_work, prototype_id)
-	          VALUES ($1, $2, $3, $4)
+	query := `INSERT INTO work_periods (start_hour, end_hour, day_work, prototype_id, backup)
+	          VALUES ($1, $2, $3, $4, $5)
 			  RETURNING period_id`
 			  
 	const layout = "2006-01-02T15:04:05.999999Z07:00"
@@ -63,7 +63,7 @@ func (postgre *PostgreSQL) CreatePeriod(wp models.WorkPeriod) (int, error) {
 	
 	var id int
 	
-	err = postgre.conn.DB.QueryRow(query, startT, startT, wp.Day_work, wp.Prototype_id).Scan(&id)	
+	err = postgre.conn.DB.QueryRow(query, startT, startT, wp.Day_work, wp.Prototype_id, false).Scan(&id)	
 	if err != nil {
 		fmt.Printf("Error al ejecutar CreatePeriod: %v", err)
 		return 0, err

@@ -6,4 +6,5 @@ type WorkPeriod struct {
 	End_hour     string `json:"end_hour"`
 	Day_work     string `json:"day_work"`
 	Prototype_id string `json:"prototype_id"`
+	Backup       bool   `json:"backup"`
 }

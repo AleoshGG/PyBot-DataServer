@@ -6,6 +6,8 @@ import (
 	rS "PyBot-DataServer/sensors/infrastructure/routes"
 	iW "PyBot-DataServer/work_periods/infrastructure"
 	rW "PyBot-DataServer/work_periods/infrastructure/routes"
+	iB "PyBot-DataServer/backup/infrastructure"
+	rB "PyBot-DataServer/backup/infrastructure/routes"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -20,6 +22,7 @@ func main() {
 	// Cargar las dependencias
 	iS.GoDependences()
 	iW.GoDependences()
+	iB.GoDependences()
 
 	// Inicio de la aplicación Gin
 	r := gin.Default()
@@ -37,6 +40,7 @@ func main() {
 
 	rS.RegisterRouter(r)
 	rW.RegisterRouter(r)
+	rB.RegisterRouter(r)
 
 	// Listen and Serve
 	r.Run(":8080")
