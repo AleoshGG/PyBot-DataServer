@@ -132,6 +132,11 @@ func getDataIdsBackupFalse(postgres *PostgreSQL) ([]int, error) {
 		fmt.Printf("Error al reccorrer las filas: %v", err)
 		return []int{}, err
 	}
+
+	if len(ids) > 0 {
+       ids = ids[:len(ids)-1]
+	}
+
 	
 	return ids, nil
 }
