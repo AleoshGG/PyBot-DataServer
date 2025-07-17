@@ -16,13 +16,20 @@ type RabbitMQ struct {
 	ch   *amqp.Channel
 }
 
-func NewRabbitMQ() *RabbitMQ{
-	conn, err := amqp.Dial(os.Getenv("URL_RABBIT"))
-	failOnError(err, "Failed to connect to RabbitMQ")
-	ch, err := conn.Channel()
-	failOnError(err, "Failed to open a channel")
-
-	return &RabbitMQ{conn: conn, ch: ch}  
+func NewRabbitMQ() (*RabbitMQ, error) {
+    conn, err := amqp.Dial(os.Getenv("URL_RABBIT"))
+    if err != nil {
+        // sólo logueamos, pero devolvemos el error para que el main siga vivo
+        log.Printf("RabbitMQ: no se pudo conectar: %v", err)
+        return nil, err
+    }
+    ch, err := conn.Channel()
+    if err != nil {
+        conn.Close()
+        log.Printf("RabbitMQ: no se pudo abrir canal: %v", err)
+        return nil, err
+    }
+    return &RabbitMQ{conn: conn, ch: ch}, nil
 }
 
 func (r *RabbitMQ) SendDataTables(d []models.DataTable) {
