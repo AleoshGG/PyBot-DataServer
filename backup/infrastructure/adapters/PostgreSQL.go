@@ -25,12 +25,11 @@ func NewPostgreSQL() *PostgreSQL {
 func (postgres *PostgreSQL) GetData() ([]b.DataTable, error) {
 	var backup []b.DataTable
 
-	ids, err := getDataIdsBackupFalse(postgres)
+	ids, err := postgres.GetDataIdsBackupFalse()
 	if err != nil {
 		fmt.Printf("Error al obtener los ids de la tabla work_periods: %v", err)
 	}
 
-	print(ids)
 
 	var work_periods b.DataTable
 	var readings b.DataTable
@@ -104,7 +103,7 @@ func (postgres *PostgreSQL) GetData() ([]b.DataTable, error) {
 	return backup, nil
 }
 
-func getDataIdsBackupFalse(postgres *PostgreSQL) ([]int, error) {
+func (postgres *PostgreSQL) GetDataIdsBackupFalse() ([]int, error) {
 	query := "SELECT period_id FROM work_periods WHERE backup = FALSE"
 
 	var ids []int
@@ -134,7 +133,7 @@ func getDataIdsBackupFalse(postgres *PostgreSQL) ([]int, error) {
 	}
 
 	if len(ids) > 0 {
-       ids = ids[:len(ids)-1]
+    	ids = ids[:len(ids)-1]
 	}
 
 	
@@ -301,16 +300,17 @@ func getGPSData(postgres *PostgreSQL, id int) ([]s.GPSData, error) {
 	return gps_data, nil
 }
 
-func (postgres *PostgreSQL) UpdateIdsBackupDone() error {
-	query := `UPDATE work_periods 
+func (postgres *PostgreSQL) UpdateIdsBackupDone(ids []int) error {
+	for _, id := range ids {
+		query := `UPDATE work_periods 
 			  SET backup = TRUE 
-			  WHERE backup = FALSE`
+			  WHERE period_id = $1`
 	
-	_, err := postgres.conn.ExecutePreparedQuery(query)
-	if err != nil {
-		fmt.Printf("Error al ejecutar UpdateIdsBackupDone: %v", err)
-		return err
+		_, err := postgres.conn.ExecutePreparedQuery(query, id)
+		if err != nil {
+			fmt.Printf("Error al ejecutar UpdateIdsBackupDone: %v", err)
+			return err
+		}
 	}
-	
 	return nil
 }
