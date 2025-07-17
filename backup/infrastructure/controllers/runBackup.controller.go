@@ -33,14 +33,16 @@ func (rbc *RunBackupController) RunBackup(c *gin.Context) {
 	}
 
 	rbc.serv.Run(dataTables)
-
-	err = rbc.db.UpdateIdsBackupDone()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"status":  false,
-			"message": "Error al actualizar: " + err.Error(),
-		})
-		return
+	if len(dataTables) < 1 {
+		
+		err = rbc.db.UpdateIdsBackupDone()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"status":  false,
+				"message": "Error al actualizar: " + err.Error(),
+			})
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{
