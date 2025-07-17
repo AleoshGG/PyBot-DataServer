@@ -24,64 +24,116 @@ func NewPostgreSQL() *PostgreSQL {
 
 func (postgres *PostgreSQL) GetData() ([]b.DataTable, error) {
 	var backup []b.DataTable
-	
-	var work_periods b.DataTable
 
-	work_periods_rows, err := getWorkPeriods(postgres)
+	ids, err := getDataIdsBackupFalse(postgres)
 	if err != nil {
-		fmt.Printf("Error al obtener los datos de la tabla work_periods: %v", err)
+		fmt.Printf("Error al obtener los ids de la tabla work_periods: %v", err)
 	}
+
+	print(ids)
+
+	var work_periods b.DataTable
+	var readings b.DataTable
+	var waste_collection b.DataTable
+	var weight_data b.DataTable
+	var gps_data b.DataTable
 
 	work_periods.Table_name = "work_periods"
-	work_periods.Data = work_periods_rows
-	backup = append(backup, work_periods)
-
-	var readings b.DataTable
-
-	readings_rows, err := getReadings(postgres)
-	if err != nil {
-		fmt.Printf("Error al obtener los datos de la tabla readings: %v", err)
-	}
-
 	readings.Table_name = "readings"
-	readings.Data = readings_rows
-	backup = append(backup, readings)
-
-	var waste_collection b.DataTable
-
-	waste_collection_rows, err := getWasteCollection(postgres)
-	if err != nil {
-		fmt.Printf("Error al obtener los datos de la tabla waste_collection: %v", err)
-	}
-
 	waste_collection.Table_name = "waste_collection"
-	waste_collection.Data = waste_collection_rows
-	backup = append(backup, waste_collection)
-
-	var weight_data b.DataTable
-
-	weight_data_rows, err := getWeightData(postgres)
-	if err != nil {
-		fmt.Printf("Error al obtener los datos de la tabla weight_data: %v", err)
-	}
-
 	weight_data.Table_name = "weight_data"
-	weight_data.Data = weight_data_rows
-	backup = append(backup, weight_data)
+	gps_data.Table_name = "gps_data"
 
-    var gps_data b.DataTable
+	var work_periods_rows []wP.WorkPeriod
+	var readings_rows []wP.Reading
+	var waste_collection_rows []s.WasteCollection
+	var weight_data_rows []s.WeightData
+	var gps_data_rows []s.GPSData
 
-	gps_data_rows, err := getGPSData(postgres)
-	if err != nil {
-		fmt.Printf("Error al obtener los datos de la tabla gps_data: %v", err)
+	for _, id := range ids {
+		
+		row, err := getWorkPeriods(postgres)
+		if err != nil {
+			fmt.Printf("Error al obtener los datos de la tabla work_periods: %v", err)
+		}
+	
+		work_periods_rows = append(work_periods_rows, row[0])
+
+		row1, err := getReadings(postgres, id)
+		if err != nil {
+			fmt.Printf("Error al obtener los datos de la tabla readings: %v", err)
+		}
+
+		readings_rows = append(readings_rows, row1[0])
+
+		row2, err := getWasteCollection(postgres, id)
+		if err != nil {
+			fmt.Printf("Error al obtener los datos de la tabla waste_collection: %v", err)
+		}
+		
+		waste_collection_rows = append(waste_collection_rows, row2[0])
+
+		row3, err := getWeightData(postgres, id)
+		if err != nil {
+			fmt.Printf("Error al obtener los datos de la tabla weight_data: %v", err)
+		}
+
+		weight_data_rows = append(weight_data_rows, row3[0])
+
+		row4, err := getGPSData(postgres, id)
+		if err != nil {
+			fmt.Printf("Error al obtener los datos de la tabla gps_data: %v", err)
+		}
+
+		gps_data_rows = append(gps_data_rows, row4[0])
 	}
 
-	gps_data.Table_name = "gps_data"
+
+	work_periods.Data = work_periods_rows
+	readings.Data = readings_rows 
+	waste_collection.Data =  waste_collection_rows
+	weight_data.Data = weight_data_rows
 	gps_data.Data = gps_data_rows
+
+	backup = append(backup, work_periods)
+	backup = append(backup, readings)
+	backup = append(backup, waste_collection)
+	backup = append(backup, weight_data)
 	backup = append(backup, gps_data)
 
 	return backup, nil
+}
 
+func getDataIdsBackupFalse(postgres *PostgreSQL) ([]int, error) {
+	query := "SELECT period_id FROM work_periods WHERE backup = FALSE"
+
+	var ids []int
+
+	rows, err := postgres.conn.DB.Query(query)
+	if err != nil {
+		fmt.Printf("Error al ejecutar getDataIdsBackupFalse: %v", err)
+		return []int{}, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var id int
+
+		if err := rows.Scan(&id); err != nil {
+			fmt.Printf("Error al escanear la fila: %v", err)
+			return []int{}, nil
+		}
+
+		ids = append(ids, id)
+	}
+
+	if err = rows.Err(); err != nil {
+		fmt.Printf("Error al reccorrer las filas: %v", err)
+		return []int{}, err
+	}
+	
+	return ids, nil
 }
 
 func getWorkPeriods(postgres *PostgreSQL) ([]wP.WorkPeriod, error) {
@@ -100,7 +152,7 @@ func getWorkPeriods(postgres *PostgreSQL) ([]wP.WorkPeriod, error) {
 	for rows.Next() {
 		var wp wP.WorkPeriod
 
-		if err := rows.Scan(&wp.Period_id, &wp.Start_hour, &wp.End_hour, &wp.Day_work, &wp.Backup); err != nil {
+		if err := rows.Scan(&wp.Period_id, &wp.Start_hour, &wp.End_hour, &wp.Day_work, &wp.Prototype_id, &wp.Backup); err != nil {
 			fmt.Printf("Error al escanear la fila: %v", err)
 			return []wP.WorkPeriod{}, nil
 		}
@@ -116,12 +168,12 @@ func getWorkPeriods(postgres *PostgreSQL) ([]wP.WorkPeriod, error) {
 	return work_periods, nil
 }
 
-func getReadings(postgres *PostgreSQL) ([]wP.Reading, error) {
-	query := "SELECT * FROM readings WHERE backup = FALSE"
+func getReadings(postgres *PostgreSQL, id int) ([]wP.Reading, error) {
+	query := "SELECT * FROM readings WHERE period_id = $1"
 
 	var readings []wP.Reading
 
-	rows, err := postgres.conn.DB.Query(query)
+	rows, err := postgres.conn.DB.Query(query, id)
 	if err != nil {
 		fmt.Printf("Error al ejecutar getReading: %v", err)
 		return []wP.Reading{}, err
@@ -148,12 +200,12 @@ func getReadings(postgres *PostgreSQL) ([]wP.Reading, error) {
 	return readings, nil
 }
 
-func getWasteCollection(postgres *PostgreSQL) ([]s.WasteCollection, error) {
-	query := "SELECT * FROM waste_collection WHERE backup = FALSE"
+func getWasteCollection(postgres *PostgreSQL, id int) ([]s.WasteCollection, error) {
+	query := "SELECT * FROM waste_collection WHERE period_id = $1"
 
 	var waste_collection []s.WasteCollection
 
-	rows, err := postgres.conn.DB.Query(query)
+	rows, err := postgres.conn.DB.Query(query, id)
 	if err != nil {
 		fmt.Printf("Error al ejecutar getWasteCollection: %v", err)
 		return []s.WasteCollection{}, err
@@ -180,12 +232,12 @@ func getWasteCollection(postgres *PostgreSQL) ([]s.WasteCollection, error) {
 	return waste_collection, nil
 }
 
-func getWeightData(postgres *PostgreSQL) ([]s.WeightData, error) {
-	query := "SELECT * FROM weight_data WHERE backup = FALSE"
+func getWeightData(postgres *PostgreSQL, id int) ([]s.WeightData, error) {
+	query := "SELECT * FROM weight_data WHERE period_id = $1"
 
 	var weight_data []s.WeightData
 
-	rows, err := postgres.conn.DB.Query(query)
+	rows, err := postgres.conn.DB.Query(query, id)
 	if err != nil {
 		fmt.Printf("Error al ejecutar getWeightData: %v", err)
 		return []s.WeightData{}, err
@@ -212,12 +264,12 @@ func getWeightData(postgres *PostgreSQL) ([]s.WeightData, error) {
 	return weight_data, nil
 }
 
-func getGPSData(postgres *PostgreSQL) ([]s.GPSData, error) {
-	query := "SELECT * FROM gps_data WHERE backup = FALSE"
+func getGPSData(postgres *PostgreSQL, id int) ([]s.GPSData, error) {
+	query := "SELECT * FROM gps_data WHERE period_id = $1"
 
 	var gps_data []s.GPSData
 
-	rows, err := postgres.conn.DB.Query(query)
+	rows, err := postgres.conn.DB.Query(query, id)
 	if err != nil {
 		fmt.Printf("Error al ejecutar getGPSData: %v", err)
 		return []s.GPSData{}, err
