@@ -49,14 +49,16 @@ func (postgres *PostgreSQL) GetData() ([]b.DataTable, error) {
 	var weight_data_rows []s.WeightData
 	var gps_data_rows []s.GPSData
 
+	work_periods_rows, err = getWorkPeriods(postgres)
+	if err != nil {
+		fmt.Printf("Error al obtener los datos de la tabla work_periods: %v", err)
+	}
+
+	if len(work_periods_rows) > 0 {
+    	work_periods_rows = work_periods_rows[:len(work_periods_rows)-1]
+	}
+
 	for _, id := range ids {
-		
-		row, err := getWorkPeriods(postgres)
-		if err != nil {
-			fmt.Printf("Error al obtener los datos de la tabla work_periods: %v", err)
-		}
-	
-		work_periods_rows = append(work_periods_rows, row[0])
 
 		row1, err := getReadings(postgres, id)
 		if err != nil {
