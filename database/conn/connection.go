@@ -23,7 +23,7 @@ func GetDBPool() *ConnPostgreSQL {
 	error := ""
 
 	// Conectar a la base de datos
-	db, err := sql.Open("postgres", os.Getenv("URL_POSTGRES"))
+	db, err := sql.Open("postgres", os.Getenv("URL_POSTGRES_SENSORS"))
 	if err != nil {
 		error = fmt.Sprintf("error al abrir la base de datos: %v", err)
 	}
@@ -73,7 +73,7 @@ func Migration() {
 
 	m, err := migrate.New(
 		normalizedPath,
-		os.Getenv("URL_POSTGRES"),
+		os.Getenv("URL_POSTGRES_SENSORS"),
 	)
 	if err != nil {
 		log.Fatal("Error al crear el migrador:", err)

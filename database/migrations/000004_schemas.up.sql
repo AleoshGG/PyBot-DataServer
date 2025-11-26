@@ -1,5 +1,6 @@
 ALTER TABLE waste_collection
- ALTER COLUMN amount TYPE INTEGER DEFAULT 0;
+    ALTER COLUMN amount TYPE INTEGER,
+    ALTER COLUMN amount SET DEFAULT 0;
 
-INSERT INTO waste_types (waste_id, waste_type) VALUES (DEFAULT, 'PET');
-INSERT INTO waste_types (waste_id, waste_type) VALUES (DEFAULT, 'CAN');
+INSERT INTO waste_types (waste_id, waste_type) VALUES (1, 'PET');
+INSERT INTO waste_types (waste_id, waste_type) VALUES (2, 'CANS');
