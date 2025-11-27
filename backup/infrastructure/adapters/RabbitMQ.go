@@ -17,18 +17,42 @@ type RabbitMQ struct {
 }
 
 func NewRabbitMQ() (*RabbitMQ, error) {
-    conn, err := amqp.Dial(os.Getenv("URL_RABBIT"))
+    var conn *amqp.Connection
+    var err error
+    
+    url := os.Getenv("URL_RABBIT")
+
+    // --- INICIO DE LÓGICA DE REINTENTOS ---
+    maxRetries := 5 // Intentaremos 5 veces
+    retryDelay := 2 * time.Second // Esperaremos 2 segundos entre intentos
+
+    for i := 0; i < maxRetries; i++ {
+        conn, err = amqp.Dial(url)
+        if err == nil {
+            // Si no hay error, salimos del bucle
+            log.Println("RabbitMQ: Conexión exitosa.")
+            break
+        }
+
+        // Si hubo error, logueamos y esperamos
+        log.Printf("RabbitMQ: Fallo al conectar (Intento %d/%d): %v. Reintentando en %v...", i+1, maxRetries, err, retryDelay)
+        time.Sleep(retryDelay)
+    }
+    // --- FIN DE LÓGICA DE REINTENTOS ---
+
+    // Si después de los 5 intentos sigue habiendo error, devolvemos el error al main
     if err != nil {
-        // sólo logueamos, pero devolvemos el error para que el main siga vivo
-        log.Printf("RabbitMQ: no se pudo conectar: %v", err)
+        log.Printf("RabbitMQ: No se pudo conectar después de %d intentos: %v", maxRetries, err)
         return nil, err
     }
+
     ch, err := conn.Channel()
     if err != nil {
         conn.Close()
         log.Printf("RabbitMQ: no se pudo abrir canal: %v", err)
         return nil, err
     }
+
     return &RabbitMQ{conn: conn, ch: ch}, nil
 }
 
